@@ -3,9 +3,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Button } from '@/components/ui/button';
-import { Textarea } from './ui/textarea';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { CodeEditor } from './CodeEditor';
 
 const formSchema = z.object({
   title: z.string().optional(),
@@ -21,7 +21,7 @@ export function FormGraph(props: { addGraph: (graph: { graphviz: string, engine:
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      graphviz: "digraph G { a -> b; b -> c; c -> d; d -> a; }",
+      graphviz: "digraph G {\n a -> b;\n b -> c;\n c -> d;\n d -> a;\n}",
       engine: "circo",
     },
   })
@@ -106,7 +106,12 @@ export function FormGraph(props: { addGraph: (graph: { graphviz: string, engine:
                 <FormItem>
                   <FormLabel>Graphviz</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="digraph G { a -> b; }" {...field} />
+                    <CodeEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="digraph G { a -> b; }"
+                      minHeight="200px"
+                    />
                   </FormControl>
                   <FormDescription>
                     This will be the graphviz code for the graph.

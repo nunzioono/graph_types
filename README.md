@@ -1,54 +1,70 @@
-# React + TypeScript + Vite
+# GraphTypes
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
+GraphTypes is a specialized web application for rendering and visualizing graphs. It provides users with a powerful, interactive interface to create, view, and manipulate graph structures with ease. Built with modern web technologies, GraphTypes offers a seamless experience for users working with graph-based data visualizations.
 
-Currently, two official plugins are available:
+## Features
+- **Graph Rendering**: Convert abstract graph data into clear, visual representations using Graphviz's powerful rendering engine
+- **Interactive Visualization**: Manipulate and explore graph structures through an intuitive user interface
+- **Customizable Styling**: Adjust node appearance, edge styles, and layout properties to create the perfect visualization
+- **Export Capabilities**: Save graphs as images or other formats for use in documentation or presentations
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Technology Stack
 
-## Expanding the ESLint configuration
+### Frontend
+- **React**: Component-based UI library for building the interface
+- **Graphviz**: Industry-standard graph visualization engine
+- **Vite**: Next-generation frontend build tool for fast development and optimized builds
+- **shadcn/ui**: High-quality React components built with Radix UI and Tailwind CSS
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Getting Started
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+### Prerequisites
+- Node.js (v16.x or later)
+- pnpm package manager
+- HTTP server for serving the built website
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Installation
+1. Clone the repository
+   ```
+   git clone https://github.com/yourusername/graphtypes.git
+   ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+2. Navigate to the project directory
+   ```
+   cd graphtypes
+   ```
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+3. Install dependencies using pnpm
+   ```
+   pnpm install
+   ```
+
+4. Build the website
+   ```
+   pnpm build
+   ```
+
+5. Serve the built website using an HTTP server
+   ```
+   # Using a simple HTTP server like 'serve'
+   pnpm add -g serve
+   serve -s dist
+
+   # Or any other HTTP server of your choice
+   ```
+
+6. Open your browser and navigate to the provided URL (usually http://localhost:5000 or similar)
+
+## Usage
+GraphTypes allows you to visualize graph structures with ease:
+
+1. Input your graph data in the supported format
+2. Customize the appearance and layout settings
+3. View the rendered graph in real-time
+4. Export or share your visualization as needed
+
+[Screenshots or GIFs would be inserted here]
+
+## Development
+To run the project in development mode:

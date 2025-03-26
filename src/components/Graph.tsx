@@ -2,8 +2,8 @@ import { instance } from '@viz-js/viz'
 import { useEffect, useRef, useState, memo, useCallback } from 'react'
 import { Button } from "@/components/ui/button";
 import { Pencil, Save, Trash2 } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
 import { useComponentLogger, hashString, truncate } from '@/contexts/LoggingContext';
+import { CodeEditor } from './CodeEditor';
 
 type SvgProps = {
   graphviz: string,
@@ -100,9 +100,29 @@ const Svg = memo(({ graphviz, engine }: SvgProps) => {
     };
   }, [renderSvg, logger]);
 
-  return error || !svg || !svg.outerHTML ?
-    <p className="text-red-500">Error: {error || "Failed to render SVG"}</p> :
-    <div dangerouslySetInnerHTML={{ __html: svg.outerHTML }} />
+  // Add SVG processing to ensure viewBox is set properly
+  useEffect(() => {
+    if (svg) {
+      // Make sure SVG has proper attributes to scale and render correctly
+      if (!svg.hasAttribute('viewBox') && svg.hasAttribute('width') && svg.hasAttribute('height')) {
+        const width = svg.getAttribute('width') || '300';
+        const height = svg.getAttribute('height') || '200';
+        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      }
+
+      // Ensure SVG doesn't force the container to stretch
+      svg.style.maxWidth = 'none';
+      svg.style.width = 'auto';
+    }
+  }, [svg]);
+
+  if (error || !svg || !svg.outerHTML) {
+    return <p className="text-red-500">Error: {error || "Failed to render SVG"}</p>;
+  }
+
+  return (
+    <div className="svg-wrapper" style={{ display: 'inline-block', overflowX: 'auto' }} dangerouslySetInnerHTML={{ __html: svg.outerHTML }} />
+  );
 }, (prevProps, nextProps) => {
   // Custom equality check for memo
   // Only re-render if graphviz or engine actually changed
@@ -140,38 +160,40 @@ export const Graph = memo(({
   logger.debug(`Graphviz hash: ${hashString(graphviz)}`);
 
   const [isEditing, setIsEditing] = useState(false);
+  const [editedGraphviz, setEditedGraphviz] = useState(graphviz);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Update editedGraphviz when graphviz prop changes
+  useEffect(() => {
+    setEditedGraphviz(graphviz);
+  }, [graphviz]);
 
   // Create stable callback functions using useCallback
   const handleEdit = useCallback(() => {
     logger.startOperation('edit', 'info');
     logger.info(`Edit button clicked for ID: ${truncate(id)}`);
+    setEditedGraphviz(graphviz); // Reset to current value when starting edit
     setIsEditing(true);
     logger.endOperation('edit');
-  }, [id, logger]);
+  }, [id, graphviz, logger]);
 
   const handleSave = useCallback(() => {
     logger.startOperation('save', 'info');
     logger.info(`Save button clicked for ID: ${truncate(id)}`);
 
-    if (textareaRef.current) {
-      const newValue = textareaRef.current.value;
-      if (newValue !== graphviz) {
-        logger.info(`New graphviz value different from current`, {
-          oldHash: hashString(graphviz),
-          newHash: hashString(newValue)
-        });
-        modifyGraph(newValue);
-      } else {
-        logger.debug(`No changes to graphviz`);
-      }
+    if (editedGraphviz !== graphviz) {
+      logger.info(`New graphviz value different from current`, {
+        oldHash: hashString(graphviz),
+        newHash: hashString(editedGraphviz)
+      });
+      modifyGraph(editedGraphviz);
     } else {
-      logger.warn(`textareaRef.current is null`);
+      logger.debug(`No changes to graphviz`);
     }
 
     setIsEditing(false);
     logger.endOperation('save');
-  }, [id, graphviz, modifyGraph, logger]);
+  }, [id, graphviz, editedGraphviz, modifyGraph, logger]);
 
   // Component mount/unmount logging
   useEffect(() => {
@@ -199,9 +221,10 @@ export const Graph = memo(({
   ), [graphviz, engine]);
 
   const result = (
-    <div className="flex flex-col border p-4 m-2 rounded-md">
+    <div className="flex flex-col border p-4 m-2 rounded-md group">
       <div className="relative flex justify-between">
-        <div className="absolute top-0 right-0 flex gap-2">
+        {/* Controls that appear on hover */}
+        <div className="absolute top-0 right-0 flex gap-2 opacity-0 group-hover:opacity-70 transition-opacity duration-200 z-10">
           {isEditing ? (
             <Button variant="default" onClick={handleSave}>
               <Save />
@@ -215,29 +238,37 @@ export const Graph = memo(({
             <Trash2 />
           </Button>
         </div>
-        <div className="flex flex-col justify-around pt-10">
+
+        {/* Title and description that appear on hover */}
+        <div className="flex flex-col justify-around pt-2 w-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <div className="flex flex-col">
-            <b>{title}</b>
-            <h2>{description}</h2>
+            <b className="text-lg">{title}</b>
+            <p className="text-muted-foreground">{description}</p>
           </div>
-          {isEditing && (
-            <Textarea
-              ref={textareaRef}
-              defaultValue={graphviz}
-              className="min-h-[200px] mt-2"
-            />
-          )}
         </div>
       </div>
 
-      <div className="mt-4">
-        {/*        <p className="text-xs text-gray-500 mb-2">
-          Graph ID: {truncate(id, 8)} |
-          Graphviz Hash: {hashString(graphviz)} |
-          Render count: {renderCount.current}
-        </p>
-*/}
-        <MemoizedSvg />
+      {/* Editing area */}
+      {isEditing && (
+        <div className="mt-4 w-full">
+          <CodeEditor
+            ref={textareaRef}
+            value={editedGraphviz}
+            onChange={(value) => setEditedGraphviz(value)}
+            placeholder="Enter GraphViz code"
+            className="mt-2"
+            minHeight="200px"
+          />
+        </div>
+      )}
+
+      {/* Graph visualization with explicitly forcing scroll */}
+      <div className="mt-4 w-full overflow-hidden">
+        <div className="overflow-x-scroll" style={{ width: '100%', overflowX: 'auto', display: 'block' }}>
+          <div style={{ minWidth: 'min-content', display: 'inline-block' }}>
+            <MemoizedSvg />
+          </div>
+        </div>
       </div>
     </div>
   );
