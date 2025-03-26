@@ -38,6 +38,7 @@ jobs:
       - name: Build static HTML
         run: pnpm build
         env:
+          VITE_BASE_URL: './'
           PUBLIC_URL: '/${{ github.event.repository.name }}'  # Automatically gets your repo name
 
       - name: Create .nojekyll file
@@ -45,6 +46,12 @@ jobs:
 
       - name: Debug dist directory (optional)
         run: find dist -type f | sort  # Lists all files to help debug
+
+      - name: Debug index.html
+        run: |
+          echo "Examining index.html for asset references:"
+          grep -n "index-" dist/index.html
+          echo "Current GitHub repository name: $GITHUB_REPOSITORY"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
