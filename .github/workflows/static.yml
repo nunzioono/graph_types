@@ -37,9 +37,6 @@ jobs:
 
       - name: Build static HTML
         run: pnpm build
-        env:
-          VITE_BASE_URL: './'
-          PUBLIC_URL: '/${{ github.event.repository.name }}'  # Automatically gets your repo name
 
       - name: Create .nojekyll file
         run: touch dist/.nojekyll
@@ -52,6 +49,18 @@ jobs:
           echo "Examining index.html for asset references:"
           grep -n "index-" dist/index.html
           echo "Current GitHub repository name: $GITHUB_REPOSITORY"
+
+      - name: Verify asset paths in index.html
+        run: |
+          echo "Checking if paths were updated correctly:"
+          cat dist/index.html | grep -E 'src="|href="' | grep -v "data:" | grep -v "favicon"
+
+      - name: Fix asset paths in index.html
+        run: |
+          echo "Fixing absolute paths in index.html"
+          sed -i 's|src="/assets/|src="./assets/|g' dist/index.html
+          sed -i 's|href="/assets/|href="./assets/|g' dist/index.html
+          cat dist/index.html | grep -E 'src="|href="' | grep -v "data:" | grep -v "favicon"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
