@@ -14,6 +14,7 @@ GraphTypes is a specialized web application for rendering and visualizing graphs
 ### Frontend
 - **React**: Component-based UI library for building the interface
 - **Graphviz**: Industry-standard graph visualization engine
+- **Viz-js**: Graphviz cjs library
 - **Vite**: Next-generation frontend build tool for fast development and optimized builds
 - **shadcn/ui**: High-quality React components built with Radix UI and Tailwind CSS
 
