@@ -37,6 +37,8 @@ jobs:
 
       - name: Build static HTML
         run: pnpm build
+        env:
+          PUBLIC_URL: '/${{ github.event.repository.name }}'  # Automatically gets your repo name
 
       - name: Create .nojekyll file
         run: touch dist/.nojekyll
@@ -50,7 +52,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'dist'  # This is correct - uploads entire dist folder
+          path: './dist'  # Make sure this points to where your index.html AND assets are
 
       - name: Deploy to GitHub Pages
         id: deployment
